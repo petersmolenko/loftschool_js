@@ -60,9 +60,7 @@ function returnFnResult(fn) {
    console.log(f()); // выведет 13
  */
 function returnCounter(number=0) {
-    return ()=>{
-        return ++number;
-    }
+    return () => ++number
 }
 
 /*
@@ -75,7 +73,7 @@ function returnCounter(number=0) {
    returnArgumentsArray(1, 2, 3) вернет [1, 2, 3]
  */
 function returnArgumentsArray() {
-    return Object.values(arguments)
+    return [...arguments]
 }
 
 /*
@@ -94,9 +92,7 @@ function returnArgumentsArray() {
    console.log(newSum()) выведет 6
  */
 function bindFunction(fn) {
-    var bindArgs = Object.values(arguments).slice(1);
-    
-    return fn.bind(null, ...bindArgs)
+    return fn.bind(null, ...[...arguments].slice(1))
 }
 
 export {
