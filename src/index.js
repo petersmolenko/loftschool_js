@@ -125,17 +125,10 @@ function calculator(number=0) {
 
     return {
         sum() {
-
-            return [...arguments]
-                .reduce((acc, el)=>{
-                    return acc + el
-                }, number)
+            return [...arguments].reduce((acc, el)=>acc + el, number)
         },
         dif() {
-            return [...arguments]
-                .reduce((acc, el)=>{
-                    return acc - el
-                }, number)
+            return [...arguments].reduce((acc, el)=>acc - el, number)
         },
         div() {
             return [...arguments]
@@ -148,10 +141,7 @@ function calculator(number=0) {
                 }, number)
         },
         mul() {
-            return [...arguments]
-                .reduce((acc, el)=>{
-                    return acc * el
-                }, number)
+            return [...arguments].reduce((acc, el)=>acc * el, number)
         },
     }
 }
