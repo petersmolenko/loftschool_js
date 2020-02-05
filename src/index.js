@@ -65,31 +65,22 @@ function upperProps(obj) {
  Посмотрите как работает slice и повторите это поведение для массива, который будет передан в параметре array
  */
 
-function slice(array, from, to) {
-    function setPoint(arr, point, isFrom) {
-        let res = null;
+function slice(array, from = 0, to = array.length) {
+    const res = [];
 
-        if (point !== undefined) {
-            if (point >= 0) {
-                res = (point >= arr.length)?(arr.length):point;
-            } else {
-                res = (arr.length + point < 0)?0:(array.length + point)
-            }
-
-        } else {
-            res = isFrom?0:(array.length)
+    if (to < 0) {
+        to = array.length + to;
+    }
+    if (from < 0) {
+        from = array.length + from;
+    }
+    for (let i = from; i < to; i++) {
+        if (array[i]) {
+            res.push(array[i])
         }
-
-        return res
     }
-
-    let res = []
-
-    for (let i = setPoint(array, from, true); i < setPoint(array, to); i++) {
-        res.push(array[i])
-    }
-
-    return res    
+    
+    return res;
 }
 
 /*
