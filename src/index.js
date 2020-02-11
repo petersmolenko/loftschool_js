@@ -11,6 +11,11 @@
    createDivWithText('loftschool') // создаст элемент div, поместит в него 'loftschool' и вернет созданный элемент
  */
 function createDivWithText(text) {
+    const el = document.createElement('div');
+
+    el.textContent = text;
+    
+    return el
 }
 
 /*
@@ -22,6 +27,7 @@ function createDivWithText(text) {
    prepend(document.querySelector('#one'), document.querySelector('#two')) // добавит элемент переданный первым аргументом в начало элемента переданного вторым аргументом
  */
 function prepend(what, where) {
+    where.prepend(what)
 }
 
 /*
@@ -44,6 +50,18 @@ function prepend(what, where) {
    findAllPSiblings(document.body) // функция должна вернуть массив с элементами div и span т.к. следующим соседом этих элементов является элемент с тегом P
  */
 function findAllPSiblings(where) {
+    return [...where.children].filter(el=>{
+        const nextEl = el.nextElementSibling; 
+        let res = null;
+
+        if (nextEl) {
+            res = nextEl.tagName === 'P'?true:false
+        } else {
+            res = false
+        }
+
+        return res
+    })
 }
 
 /*
@@ -66,7 +84,7 @@ function findAllPSiblings(where) {
 function findError(where) {
     var result = [];
 
-    for (var child of where.childNodes) {
+    for (var child of where.children) {
         result.push(child.innerText);
     }
 
@@ -86,6 +104,9 @@ function findError(where) {
    должно быть преобразовано в <div></div><p></p>
  */
 function deleteTextNodes(where) {
+    Array.from(where.childNodes)
+        .filter(el=>el.nodeType === 3)
+        .forEach(el=>el.remove())
 }
 
 /*
@@ -100,6 +121,14 @@ function deleteTextNodes(where) {
    должно быть преобразовано в <span><div><b></b></div><p></p></span>
  */
 function deleteTextNodesRecursive(where) {
+    [...where.childNodes]
+        .forEach(el=>{
+            if (el.nodeType === 3) {
+                el.remove()
+            } else if (el.nodeType === 1) {
+                deleteTextNodesRecursive(el)
+            }
+        })
 }
 
 /*
@@ -123,6 +152,43 @@ function deleteTextNodesRecursive(where) {
    }
  */
 function collectDOMStat(root) {
+    return [...root.childNodes]
+        .reduce((a, el)=>{
+            if (el.nodeType === 3) {
+                a.texts += 1;
+            } else if (el.nodeType === 1) {
+                a.tags[el.tagName] = a.tags[el.tagName]?++a.tags[el.tagName]:1;
+                [...el.classList].forEach(cls=>{
+                    a.classes[cls] = a.classes[cls]?++a.classes[cls]:1
+                });
+
+                let ch = collectDOMStat(el);
+
+                a.texts += ch.texts;
+
+                for (const cls in ch.classes) {
+                    if (a.classes.hasOwnProperty(cls)) {
+                        a.classes[cls] += ch.classes[cls]
+                    } else {
+                        a.classes[cls] = ch.classes[cls]
+                    }
+                }
+
+                for (const tag in ch.tags) {
+                    if (a.tags.hasOwnProperty(tag)) {
+                        a.tags[tag] += ch.tags[tag]
+                    } else {
+                        a.tags[tag] = ch.tags[tag]
+                    }
+                }
+            }
+
+            return a
+        }, {
+            tags: {},
+            classes: {},
+            texts: 0
+        })
 }
 
 /*
@@ -158,6 +224,28 @@ function collectDOMStat(root) {
    }
  */
 function observeChildNodes(where, fn) {
+    let observer = new MutationObserver(mutationRecords => {
+        [...mutationRecords].forEach(rec=>{
+            if (rec.addedNodes.length) {
+                fn({
+                    type: 'insert', 
+                    nodes: [...rec.addedNodes]
+                })
+            }
+
+            if (rec.removedNodes.length) {
+                fn({
+                    type: 'remove', 
+                    nodes: [...rec.removedNodes]
+                })
+            }
+        })
+    });
+
+    observer.observe(where, {
+        childList: true, // наблюдать за непосредственными детьми
+        subtree: true, // и более глубокими потомками
+    });
 }
 
 export {
