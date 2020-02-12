@@ -27,6 +27,22 @@ const homeworkContainer = document.querySelector('#homework-container');
    homeworkContainer.appendChild(newDiv);
  */
 function createDiv() {
+    const el = document.createElement('div'); 
+    const style = el.style;
+
+    el.className = 'draggable-div';
+    style.width = `${(Math.floor(Math.random()*500))}px`;
+    style.height = `${(Math.floor(Math.random()*500))}px`;
+    style.position = 'absolute';
+    style.top = `${(Math.floor(Math.random()*500))}px`;
+    style.left = `${(Math.floor(Math.random()*500))}px`;
+    style.background = `rgb(
+        ${(Math.floor(Math.random()*256))}, 
+        ${(Math.floor(Math.random()*256))}, 
+        ${(Math.floor(Math.random()*256))}
+    )`;
+
+    return el
 }
 
 /*
@@ -38,6 +54,29 @@ function createDiv() {
    addListeners(newDiv);
  */
 function addListeners(target) {
+    const offsets = {
+        top: 0, 
+        left: 0
+    };
+
+    target.draggable='true';
+    
+    target.addEventListener('dragstart', e=>{
+        e.target.style.opacity = '0.3';
+        offsets.top = e.offsetY;
+        offsets.left = e.offsetX
+    }, false);
+
+    target.addEventListener('drag', e=>{
+        if (e.clientY !== 0 && e.clientX !== 0) {
+            e.target.style.top = e.clientY - offsets.top + 'px';
+            e.target.style.left = e.clientX - offsets.left + 'px'
+        }
+    }, false);
+
+    target.addEventListener('dragend', e=>{
+        e.target.style.opacity = '1'
+    }, false);
 }
 
 let addDivButton = homeworkContainer.querySelector('#addDiv');
