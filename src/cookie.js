@@ -43,10 +43,107 @@ const addButton = homeworkContainer.querySelector('#add-button');
 // таблица со списком cookie
 const listTable = homeworkContainer.querySelector('#list-table tbody');
 
-filterNameInput.addEventListener('keyup', function() {
-    // здесь можно обработать нажатия на клавиши внутри текстового поля для фильтрации cookie
+loadCookieList(cookieParser());
+
+filterNameInput.addEventListener('keyup', ()=>{
+    loadCookieList(cookieParser().filter(cookie=>cookieFilter(cookie)))
 });
 
-addButton.addEventListener('click', () => {
-    // здесь можно обработать нажатие на кнопку "добавить cookie"
+addButton.addEventListener('click', ()=>{
+    if (!cookieParser().map(cookie=>cookie.name).includes(addNameInput.value) && 
+        cookieFilter({
+            name: addNameInput.value, 
+            value: addValueInput.value
+        })) {
+        listTable.append(newCookieLine({
+            name: addNameInput.value, 
+            value: addValueInput.value
+        }));
+    } else {
+        let cookieEl = listTable.querySelector(`tr[data-cookie="${addNameInput.value}"]`);
+
+        if (cookieEl) {
+            if (addValueInput.value.includes(filterNameInput.value)) {
+                cookieEl.querySelector('.cookieValue').textContent = addValueInput.value
+            } else {
+                cookieEl.remove()
+            }
+        }
+    }
+
+    document.cookie = `${addNameInput.value}=${addValueInput.value}`;
 });
+
+// функция возвращает true, если хотя бы одно свойство cookie-объекта ({name: <name>, value: <value>})
+// содержит значение поля фильтрации filterNameInput
+function cookieFilter(cookie) {
+    return (cookie.name).includes(filterNameInput.value) || (cookie.value).includes(filterNameInput.value)
+}
+
+// функция перебирает массив cookie-объектов ({name: <name>, value: <value>}) и на их основе
+// создает и добавляет новые строки в таблицу listTable
+function loadCookieList(cookies=[]) {
+    const cookieList = [];
+
+    listTable.innerHTML = '';
+
+    cookies
+        .forEach(cookie=>{
+            cookieList.push(newCookieLine(cookie))
+        });
+
+    listTable.append(...cookieList)
+}
+
+// функция преобразует значение document.cookie в массив cookie-объектов ({name: <name>, value: <value>})
+// после чего возвращает полученный массив
+function cookieParser() {
+    let cookieList = [];
+
+    if (document.cookie) {
+        cookieList = document.cookie
+            .split('; ')
+            .map(cookie=>{
+                let [name, value] = cookie.split('=');
+
+                return {
+                    name: name, 
+                    value: value
+                }
+            })
+    }
+
+    return cookieList  
+}
+
+// функция на основе переданного cookie-объекта ({name: <name>, value: <value>}) создает, а затем возвращает строку таблицы
+function newCookieLine(cookie) {
+    const cookieLine = document.createElement('tr');
+    const cookieName = document.createElement('td');
+    const cookieValue = document.createElement('td');
+    const cookieDelete = document.createElement('td');
+    const cookieDeleteBtn = document.createElement('button');
+
+    cookieName.textContent = cookie.name;
+    cookieName.className = 'cookieName';
+
+    cookieValue.textContent = cookie.value;
+    cookieValue.className = 'cookieValue';
+
+    cookieDelete.append(cookieDeleteBtn);
+
+    cookieDeleteBtn.textContent = 'Удалить';
+
+    cookieLine.setAttribute('data-cookie', cookie.name);
+    cookieLine.append(cookieName, cookieValue, cookieDelete);
+    cookieLine.addEventListener('click', e=>{
+        if (e.target.tagName === 'BUTTON') {
+            const date = new Date(Date.now() - 1);
+
+            document.cookie = `${e.currentTarget.dataset.cookie}=null; expires=${date.toUTCString()}`;
+            e.currentTarget.remove()
+        }
+    });
+
+    return cookieLine
+}
