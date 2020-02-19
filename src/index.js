@@ -79,7 +79,7 @@ function loadTownsOrRepeat() {
                 filterBlock.style.display = 'block'
             },
             ()=>{
-                if (!loadingBlock.getElementById('loadErr')) {
+                if (!loadingBlock.querySelector('#loadErr')) {
                     const loadErr = document.createElement('div');
                     const errMess = document.createElement('div');
                     const repeatBtn = document.createElement('button');
