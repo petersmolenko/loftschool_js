@@ -4,6 +4,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const rules = require('./webpack.config.rules');
 const fs = require('fs');
 const path = require('path');
+const devServer = {};
 const root = path.resolve('src');
 const files = fs.readdirSync(root)
     .reduce((all, current) => {
@@ -23,6 +24,7 @@ const entries = files['.js'].reduce((all, { name, absPath }) => {
 const html = files['.hbs']
     .filter(file => entries.hasOwnProperty(file.name))
     .map((file) => {
+        devServer.index = `${file.name}.html`
         return new HtmlPlugin({
             title: file.name,
             template: file.absPath,
@@ -45,6 +47,7 @@ module.exports = {
     },
     mode: 'development',
     devtool: 'source-map',
+    devServer,
     module: {
         rules: [
             ...rules,
