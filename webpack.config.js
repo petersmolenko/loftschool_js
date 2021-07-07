@@ -4,30 +4,27 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const rules = require('./webpack.config.rules');
 const fs = require('fs');
 const path = require('path');
-
+const devServer = {};
 const root = path.resolve('src');
 const files = fs.readdirSync(root)
     .reduce((all, current) => {
         const ext = path.extname(current);
         const name = path.basename(current, ext);
         const absPath = path.join(root, current);
-
         if (!all.hasOwnProperty(ext)) {
             all[ext] = [];
         }
-
         all[ext].push({ name, absPath });
-
         return all;
     }, { '.js': [], '.hbs': [] });
 const entries = files['.js'].reduce((all, { name, absPath }) => {
     all[name] = absPath;
-
     return all;
 }, {});
 const html = files['.hbs']
     .filter(file => entries.hasOwnProperty(file.name))
     .map((file) => {
+        devServer.index = `${file.name}.html`
         return new HtmlPlugin({
             title: file.name,
             template: file.absPath,
@@ -35,7 +32,6 @@ const html = files['.hbs']
             chunks: [file.name]
         });
     });
-
 if (!html.length || !files['.hbs'].find(file => file.name === 'index')) {
     html.push(new HtmlPlugin({
         title: 'index',
@@ -43,7 +39,6 @@ if (!html.length || !files['.hbs'].find(file => file.name === 'index')) {
         chunks: ['index']
     }));
 }
-
 module.exports = {
     entry: entries,
     output: {
@@ -52,6 +47,7 @@ module.exports = {
     },
     mode: 'development',
     devtool: 'source-map',
+    devServer,
     module: {
         rules: [
             ...rules,
